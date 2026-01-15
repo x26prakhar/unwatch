@@ -26,8 +26,8 @@ Tired of talks and podcasts being video-only? This tool takes any YouTube link a
 
 1. **Clone the repo**
    ```bash
-   git clone https://github.com/YOUR_USERNAME/i-hate-video.git
-   cd i-hate-video
+   git clone https://github.com/jaswsunny/youtube-to-text.git
+   cd youtube-to-text
    ```
 
 2. **Create a virtual environment**
