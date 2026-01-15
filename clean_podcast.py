@@ -121,7 +121,7 @@ def generate_takeaways(transcript: str, video_title: str, api_key: str) -> str:
 
 Each takeaway should be:
 - One sentence, maximum 20 words
-- Written in plain language for a layperson (no jargon)
+- Crisp and clear with minimum jargon
 - A key insight, announcement, or important point from the video
 
 Return ONLY a bullet list with exactly 5 items. Do not include any intro text like "Here are the takeaways" - just the bullet points.
@@ -149,6 +149,8 @@ Split the transcript into natural paragraphs, where each paragraph is maximum 20
 After cleaning the transcript, add chapters to split up sections/themes. Give each chapter a bolded title and insert them into the transcript as subheaders (use ### markdown formatting). The title should be a single short sentence expressing the key takeaway of that chapter.
 
 Otherwise, modify the original substance the minimum amount. Make sure the transcript is complete and not missing chunks. Be very meticulous.
+
+Return ONLY the cleaned transcript. Do not include any intro text like "Here's the cleaned transcript..." - just start directly with the first chapter heading and content.
 
 TRANSCRIPT:
 {transcript}"""
