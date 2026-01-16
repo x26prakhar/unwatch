@@ -166,9 +166,11 @@ def download(job_id):
 def download_pdf(job_id):
     """Download the transcript as a PDF file."""
     from urllib.parse import quote
-    from weasyprint import HTML, CSS
-    import markdown
+    from urllib.request import urlopen
+    from fpdf import FPDF
     import io
+    import re
+    import tempfile
 
     job = jobs.get(job_id)
     if not job:
@@ -181,10 +183,20 @@ def download_pdf(job_id):
 
     # Get font from query parameter, default to Times New Roman
     font = request.args.get("font", "Times New Roman")
-    # Sanitize font name to prevent CSS injection
     allowed_fonts = ["Arial", "Comic Sans MS", "Georgia", "Tahoma", "Times New Roman", "Wingdings"]
     if font not in allowed_fonts:
         font = "Times New Roman"
+
+    # Map user fonts to PDF standard fonts
+    font_map = {
+        "Arial": "Helvetica",
+        "Comic Sans MS": "Helvetica",
+        "Georgia": "Times",
+        "Tahoma": "Helvetica",
+        "Times New Roman": "Times",
+        "Wingdings": "Helvetica",
+    }
+    pdf_font = font_map.get(font, "Times")
 
     # Get zoom level, default to 100%
     try:
@@ -193,67 +205,114 @@ def download_pdf(job_id):
     except ValueError:
         zoom = 100
 
-    # Calculate font sizes based on zoom
-    base_font_size = 12 * zoom / 100
-    h1_font_size = 18 * zoom / 100
-    h2_font_size = 14 * zoom / 100
+    # Calculate font sizes based on zoom (in points)
+    base_size_pt = 12 * zoom / 100
+    h1_size_pt = 18 * zoom / 100
+    h2_size_pt = 14 * zoom / 100
+    # Ensure minimum sizes
+    base_size_pt = max(8, base_size_pt)
+    h1_size_pt = max(12, h1_size_pt)
+    h2_size_pt = max(10, h2_size_pt)
 
-    # Convert markdown to HTML
+    # Line height multiplier (1.15 like Word default)
+    line_mult = 1.15
+    # Convert points to mm for line height (1 pt = 0.3528 mm)
+    pt_to_mm = 0.3528
+    base_line = base_size_pt * line_mult * pt_to_mm
+    h1_line = h1_size_pt * line_mult * pt_to_mm
+    h2_line = h2_size_pt * line_mult * pt_to_mm
+
+    # Create PDF (Letter size: 215.9 x 279.4 mm)
+    pdf = FPDF(orientation='P', unit='mm', format='Letter')
+    pdf.set_margins(25, 25, 25)
+    pdf.set_auto_page_break(auto=True, margin=25)
+    pdf.add_page()
+    pdf.set_font(pdf_font, '', base_size_pt)
+
+    # Helper to sanitize text for PDF (latin-1 compatible)
+    def sanitize(t):
+        return t.encode('latin-1', 'replace').decode('latin-1')
+
+    # Parse markdown and add to PDF
     md_content = result["markdown"]
-    html_content = markdown.markdown(md_content, extensions=['tables', 'fenced_code'])
+    lines = md_content.split('\n')
 
-    # Wrap in full HTML document with styling
-    full_html = f"""<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="utf-8">
-    <title>{result["title"]}</title>
-</head>
-<body>
-{html_content}
-</body>
-</html>"""
+    for line in lines:
+        line = line.rstrip()
 
-    # PDF styling with selected font and zoom
-    css = CSS(string=f"""
-        @page {{
-            margin: 1in;
-            size: letter;
-        }}
-        body {{
-            font-family: "{font}", sans-serif;
-            font-size: {base_font_size}pt;
-            line-height: 1.5;
-            color: #333;
-        }}
-        h1 {{
-            font-family: "{font}", sans-serif;
-            font-size: {h1_font_size}pt;
-            margin-bottom: 0.5em;
-        }}
-        h2 {{
-            font-family: "{font}", sans-serif;
-            font-size: {h2_font_size}pt;
-            margin-top: 1em;
-            margin-bottom: 0.5em;
-            border-bottom: 1px solid #ccc;
-            padding-bottom: 0.2em;
-        }}
-        img {{
-            max-width: 100%;
-            height: auto;
-        }}
-        ul, ol {{
-            margin-left: 1.5em;
-        }}
-        li {{
-            margin-bottom: 0.3em;
-        }}
-    """)
+        # Image line - download and embed
+        if line.startswith('!['):
+            match = re.match(r'!\[.*?\]\((.+?)\)', line)
+            if match:
+                img_url = match.group(1)
+                try:
+                    with urlopen(img_url, timeout=10) as response:
+                        img_data = response.read()
+                    with tempfile.NamedTemporaryFile(suffix='.jpg', delete=False) as tmp:
+                        tmp.write(img_data)
+                        tmp_path = tmp.name
+                    # Add image centered, max width 100mm
+                    page_width = pdf.epw
+                    img_width = min(100, page_width * 0.6)
+                    x_pos = (pdf.w - img_width) / 2
+                    pdf.image(tmp_path, x=x_pos, w=img_width)
+                    pdf.ln(base_line)
+                    os.unlink(tmp_path)
+                except Exception:
+                    pass  # Skip image if download fails
+            continue
 
-    # Generate PDF
+        # H1 header
+        if line.startswith('# '):
+            pdf.set_font(pdf_font, 'B', h1_size_pt)
+            pdf.multi_cell(0, h1_line, sanitize(line[2:]), new_x="LMARGIN", new_y="NEXT")
+            pdf.ln(base_line * 0.5)
+            pdf.set_font(pdf_font, '', base_size_pt)
+        # H2 header
+        elif line.startswith('## '):
+            pdf.ln(base_line)
+            pdf.set_font(pdf_font, 'B', h2_size_pt)
+            pdf.multi_cell(0, h2_line, sanitize(line[3:]), new_x="LMARGIN", new_y="NEXT")
+            pdf.ln(base_line * 0.3)
+            pdf.set_font(pdf_font, '', base_size_pt)
+        # H3 header (chapter titles)
+        elif line.startswith('### '):
+            pdf.ln(base_line * 0.5)
+            pdf.set_font(pdf_font, 'B', base_size_pt)
+            pdf.multi_cell(0, base_line, sanitize(line[4:]), new_x="LMARGIN", new_y="NEXT")
+            pdf.ln(base_line * 0.3)
+            pdf.set_font(pdf_font, '', base_size_pt)
+        # Horizontal rule
+        elif line.strip() == '---':
+            pdf.ln(base_line * 0.5)
+            y = pdf.get_y()
+            pdf.line(pdf.l_margin, y, pdf.w - pdf.r_margin, y)
+            pdf.ln(base_line * 0.5)
+        # Bullet point
+        elif line.lstrip().startswith('* ') or line.lstrip().startswith('- '):
+            text = line.lstrip()
+            if text.startswith('* '):
+                text = text[2:]
+            elif text.startswith('- '):
+                text = text[2:]
+            text = text.lstrip()
+            # Add bullet with indent, preserve bold markdown
+            pdf.set_x(pdf.l_margin + 5)
+            pdf.multi_cell(0, base_line, f"- {sanitize(text)}", new_x="LMARGIN", new_y="NEXT", markdown=True)
+        # Regular paragraph
+        elif line.strip():
+            text = line
+            # Handle links - keep link text only
+            text = re.sub(r'\[([^\]]+)\]\([^)]+\)', r'\1', text)
+            # Use markdown=True to render **bold** text
+            pdf.multi_cell(0, base_line, sanitize(text), new_x="LMARGIN", new_y="NEXT", markdown=True)
+        # Empty line - small gap
+        else:
+            pdf.ln(base_line * 0.5)
+
+    # Output PDF to buffer
     pdf_buffer = io.BytesIO()
-    HTML(string=full_html).write_pdf(pdf_buffer, stylesheets=[css])
+    pdf.output(pdf_buffer)
     pdf_buffer.seek(0)
 
     # Filename handling
