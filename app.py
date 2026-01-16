@@ -182,7 +182,7 @@ def download_pdf(job_id):
     # Get font from query parameter, default to Times New Roman
     font = request.args.get("font", "Times New Roman")
     # Sanitize font name to prevent CSS injection
-    allowed_fonts = ["Times New Roman", "Tahoma", "Comic Sans MS", "Arial", "Wingdings"]
+    allowed_fonts = ["Arial", "Calibri", "Comic Sans MS", "Garamond", "Georgia", "Tahoma", "Times New Roman", "Wingdings"]
     if font not in allowed_fonts:
         font = "Times New Roman"
 
