@@ -53,9 +53,7 @@
                     </div>
                     <div class="font-menu" id="font-menu">
                         <button class="font-option" data-font="Arial" style="font-family: Arial, sans-serif;">Arial</button>
-                        <button class="font-option" data-font="Calibri" style="font-family: Calibri, sans-serif;">Calibri</button>
                         <button class="font-option" data-font="Comic Sans MS" style="font-family: 'Comic Sans MS', cursive;">Comic Sans</button>
-                        <button class="font-option" data-font="Garamond" style="font-family: Garamond, serif;">Garamond</button>
                         <button class="font-option" data-font="Georgia" style="font-family: Georgia, serif;">Georgia</button>
                         <button class="font-option" data-font="Tahoma" style="font-family: Tahoma, sans-serif;">Tahoma</button>
                         <button class="font-option selected" data-font="Times New Roman" style="font-family: 'Times New Roman', serif;">Times New Roman</button>
@@ -366,7 +364,7 @@
                     saveBtn.disabled = true;
                     saveBtn.textContent = 'Generating...';
                     const font = encodeURIComponent(currentFont);
-                    await downloadFile(`/download/${currentJobId}/pdf?font=${font}`, 'transcript.pdf');
+                    await downloadFile(`/download/${currentJobId}/pdf?font=${font}&zoom=${currentZoom}`, 'transcript.pdf');
                 } catch (error) {
                     alert('PDF download failed: ' + error.message);
                 } finally {

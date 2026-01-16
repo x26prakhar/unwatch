@@ -182,9 +182,21 @@ def download_pdf(job_id):
     # Get font from query parameter, default to Times New Roman
     font = request.args.get("font", "Times New Roman")
     # Sanitize font name to prevent CSS injection
-    allowed_fonts = ["Arial", "Calibri", "Comic Sans MS", "Garamond", "Georgia", "Tahoma", "Times New Roman", "Wingdings"]
+    allowed_fonts = ["Arial", "Comic Sans MS", "Georgia", "Tahoma", "Times New Roman", "Wingdings"]
     if font not in allowed_fonts:
         font = "Times New Roman"
+
+    # Get zoom level, default to 100%
+    try:
+        zoom = int(request.args.get("zoom", 100))
+        zoom = max(50, min(200, zoom))  # Clamp between 50-200%
+    except ValueError:
+        zoom = 100
+
+    # Calculate font sizes based on zoom
+    base_font_size = 12 * zoom / 100
+    h1_font_size = 18 * zoom / 100
+    h2_font_size = 14 * zoom / 100
 
     # Convert markdown to HTML
     md_content = result["markdown"]
@@ -202,7 +214,7 @@ def download_pdf(job_id):
 </body>
 </html>"""
 
-    # PDF styling with selected font
+    # PDF styling with selected font and zoom
     css = CSS(string=f"""
         @page {{
             margin: 1in;
@@ -210,18 +222,18 @@ def download_pdf(job_id):
         }}
         body {{
             font-family: "{font}", sans-serif;
-            font-size: 12pt;
+            font-size: {base_font_size}pt;
             line-height: 1.5;
             color: #333;
         }}
         h1 {{
             font-family: "{font}", sans-serif;
-            font-size: 18pt;
+            font-size: {h1_font_size}pt;
             margin-bottom: 0.5em;
         }}
         h2 {{
             font-family: "{font}", sans-serif;
-            font-size: 14pt;
+            font-size: {h2_font_size}pt;
             margin-top: 1em;
             margin-bottom: 0.5em;
             border-bottom: 1px solid #ccc;
