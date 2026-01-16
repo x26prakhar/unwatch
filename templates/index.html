@@ -51,6 +51,9 @@
                     <select id="font-select">
                         <option value="Times New Roman" selected>Times New Roman</option>
                         <option value="Tahoma">Tahoma</option>
+                        <option value="Comic Sans MS">Comic Sans</option>
+                        <option value="Arial">Arial</option>
+                        <option value="Wingdings">Wingdings</option>
                     </select>
                 </label>
                 <div class="zoom-controls">
@@ -198,7 +201,12 @@
         // Font switcher
         const fontSelect = document.getElementById('font-select');
         fontSelect.addEventListener('change', () => {
-            markdownViewer.style.fontFamily = fontSelect.value + ', serif';
+            const font = fontSelect.value;
+            markdownViewer.style.fontFamily = font + ', serif';
+            // Also update headers
+            markdownViewer.querySelectorAll('h1, h2, h3, h4, h5, h6').forEach(h => {
+                h.style.fontFamily = font + ', serif';
+            });
         });
 
         // Zoom controls
