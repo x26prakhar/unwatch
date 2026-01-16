@@ -15,7 +15,7 @@ Tired of talks and podcasts being video-only? This tool takes any YouTube link a
 - Includes video thumbnail
 - MS Word 2003-inspired interface
 - Export as Markdown (.md) or PDF
-- Font selection (Times New Roman, Tahoma, Comic Sans, Arial, Wingdings)
+- Font selection (Arial, Comic Sans, Georgia, Tahoma, Times New Roman, Wingdings)
 - Zoom controls for adjusting text size
 - Persistent cache saves results to disk
 
@@ -64,7 +64,7 @@ Tired of talks and podcasts being video-only? This tool takes any YouTube link a
 
 1. Paste a YouTube URL into the input field
 2. Click "Textify"
-3. Wait for the transcript to be processed (30-60 seconds)
+3. Wait for the transcript to be processed (this may take a few minutes)
 4. Read the transcript in the viewer
 5. Use the font dropdown and zoom controls to customize the view
 6. Click "Save" and choose Markdown or PDF to download
@@ -79,7 +79,7 @@ Tired of talks and podcasts being video-only? This tool takes any YouTube link a
 - Flask (Python web framework)
 - yt-dlp (YouTube transcript extraction)
 - Google Gemini AI (transcript cleaning)
-- WeasyPrint (PDF generation)
+- fpdf2 (PDF generation)
 - marked.js (Markdown rendering)
 
 ## License
