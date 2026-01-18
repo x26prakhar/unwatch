@@ -6,12 +6,96 @@
 
 body {
     font-family: Tahoma, "Segoe UI", Geneva, sans-serif;
-    background: #6375d6;
+    background: url('bliss.jpg') no-repeat center center fixed;
+    background-size: cover;
     color: #000;
     line-height: 1.4;
     min-height: 100vh;
     font-size: 11px;
     padding: 20px;
+    padding-bottom: 50px;
+}
+
+/* Windows XP Taskbar */
+.taskbar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 30px;
+    background: linear-gradient(to bottom, #3168d5 0%, #4993e6 3%, #2157d7 5%, #2663e0 15%, #1941a5 90%, #1941a5 100%);
+    border-top: 1px solid #0c3b93;
+    display: flex;
+    align-items: center;
+    padding: 0 2px;
+    z-index: 1000;
+}
+
+.start-button {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 10px 2px 6px;
+    height: 24px;
+    background: linear-gradient(to bottom, #3b9c3b 0%, #3db43d 8%, #2d8f2d 40%, #288e28 50%, #1f7d1f 95%, #156415 100%);
+    border: none;
+    border-radius: 0 8px 8px 0;
+    cursor: pointer;
+    font-family: "Franklin Gothic Medium", Tahoma, sans-serif;
+    font-size: 13px;
+    font-weight: bold;
+    font-style: italic;
+    color: #fff;
+    text-shadow: 0 1px 1px rgba(0,0,0,0.4);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.3);
+}
+
+.start-button:hover {
+    background: linear-gradient(to bottom, #4db84d 0%, #4fc84f 8%, #3da33d 40%, #38a238 50%, #2f912f 95%, #257925 100%);
+}
+
+.start-button::before {
+    content: '';
+    width: 18px;
+    height: 18px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3ClinearGradient id='r' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%23ff5f4f'/%3E%3Cstop offset='100%25' stop-color='%23d42d1a'/%3E%3C/linearGradient%3E%3ClinearGradient id='g' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%2390d231'/%3E%3Cstop offset='100%25' stop-color='%235ea003'/%3E%3C/linearGradient%3E%3ClinearGradient id='b' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%2300c4f7'/%3E%3Cstop offset='100%25' stop-color='%230078d7'/%3E%3C/linearGradient%3E%3ClinearGradient id='y' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%23ffe066'/%3E%3Cstop offset='100%25' stop-color='%23f7a600'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath d='M5 8 Q25 2 45 12 L45 45 L5 45 Z' fill='url(%23r)'/%3E%3Cpath d='M55 12 Q75 2 95 8 L95 45 L55 45 Z' fill='url(%23g)'/%3E%3Cpath d='M5 55 L45 55 L45 88 Q25 98 5 92 Z' fill='url(%23b)'/%3E%3Cpath d='M55 55 L95 55 L95 92 Q75 98 55 88 Z' fill='url(%23y)'/%3E%3C/svg%3E");
+    background-size: contain;
+    background-repeat: no-repeat;
+}
+
+.taskbar-windows {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    padding-left: 6px;
+}
+
+.taskbar-window {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 8px;
+    height: 22px;
+    background: linear-gradient(to bottom, #3c8cf4 0%, #2570d4 50%, #1a5ab8 100%);
+    border: 1px solid #1a47a0;
+    border-radius: 2px;
+    font-size: 11px;
+    color: #fff;
+    max-width: 160px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.taskbar-time {
+    padding: 0 10px;
+    font-size: 11px;
+    color: #fff;
+    background: linear-gradient(to bottom, #1a8cd8 0%, #1569b3 50%, #0f4c8a 100%);
+    height: 100%;
+    display: flex;
+    align-items: center;
+    border-left: 1px solid #0c3b93;
 }
 
 .container {
