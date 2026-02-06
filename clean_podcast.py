@@ -54,12 +54,13 @@ def extract_transcript(url: str) -> str:
 
     try:
         # Try to get transcript using youtube-transcript-api (doesn't get blocked)
-        transcript_list = YouTubeTranscriptApi.get_transcript(video_id, languages=['en', 'en-US', 'en-GB'])
+        ytt_api = YouTubeTranscriptApi()
+        transcript = ytt_api.fetch(video_id, languages=['en', 'en-US', 'en-GB'])
 
         # Combine all text segments
         text_parts = []
-        for segment in transcript_list:
-            text = segment.get('text', '').strip()
+        for segment in transcript:
+            text = segment.text.strip() if hasattr(segment, 'text') else str(segment.get('text', '')).strip()
             if text:
                 text_parts.append(text)
 
