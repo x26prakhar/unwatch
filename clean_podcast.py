@@ -49,38 +49,23 @@ def get_video_info(url: str) -> dict:
 
 
 def extract_transcript(url: str) -> str:
-    """Extract transcript from YouTube video using yt-dlp."""
-    with tempfile.TemporaryDirectory() as tmpdir:
-        # Download subtitles using yt-dlp
-        result = subprocess.run(
-            [
-                YT_DLP,
-                "--write-auto-sub",
-                "--sub-lang", "en",
-                "--skip-download",
-                "--sub-format", "vtt",
-                "-o", f"{tmpdir}/%(id)s.%(ext)s",
-                url,
-            ],
-            capture_output=True,
-            text=True,
-        )
+    """Extract transcript from YouTube video using youtube-transcript-api."""
+    video_id = extract_video_id(url)
 
-        if result.returncode != 0:
-            raise Exception(f"Failed to extract transcript: {result.stderr}")
+    try:
+        # Try to get transcript using youtube-transcript-api (doesn't get blocked)
+        transcript_list = YouTubeTranscriptApi.get_transcript(video_id, languages=['en', 'en-US', 'en-GB'])
 
-        # Find the subtitle file
-        vtt_files = list(Path(tmpdir).glob("*.vtt"))
-        if not vtt_files:
-            raise Exception("No transcript found for this video")
+        # Combine all text segments
+        text_parts = []
+        for segment in transcript_list:
+            text = segment.get('text', '').strip()
+            if text:
+                text_parts.append(text)
 
-        vtt_file = vtt_files[0]
-
-        # Parse VTT and extract text
-        with open(vtt_file, "r", encoding="utf-8") as f:
-            content = f.read()
-
-        return parse_vtt(content)
+        return ' '.join(text_parts)
+    except Exception as e:
+        raise Exception(f"No transcript found for this video: {e}")
 
 
 def parse_vtt(vtt_content: str) -> str:
