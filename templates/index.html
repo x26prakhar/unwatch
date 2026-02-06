@@ -3,96 +3,586 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>I Hate Video</title>
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path fill='%23000' d='M6 4h4v1H8v14h2v1H6v-1h2V5H6V4zm8 0h4v1h-2v14h2v1h-4v-1h2V5h-2V4z'/><rect fill='%23000' x='11' y='4' width='2' height='16'/></svg>">
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <title>UNWATCH</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90' font-family='serif'>U</text></svg>">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Lora:ital,wght@0,400;0,700;1,400&family=Merriweather:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #faf8f5;
+            color: #1a1a1a;
+            font-family: 'Libre Baskerville', 'Georgia', serif;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 720px;
+            padding: 0 24px;
+        }
+
+        /* Header */
+        header {
+            text-align: center;
+            padding: 60px 0 40px;
+        }
+
+        .attribution {
+            font-size: 12px;
+            color: #999;
+            margin-top: 8px;
+        }
+
+        .attribution a {
+            color: #2563eb;
+            text-decoration: none;
+        }
+
+        .attribution a:hover {
+            text-decoration: underline;
+        }
+
+        .masthead {
+            font-family: 'Playfair Display', serif;
+            font-size: 64px;
+            font-weight: 900;
+            line-height: 1;
+            margin-bottom: 12px;
+            color: #1a1a1a;
+            letter-spacing: -1px;
+        }
+
+        .tagline {
+            font-family: 'Libre Baskerville', serif;
+            font-size: 16px;
+            color: #666;
+        }
+
+        /* Input area */
+        .input-section {
+            padding: 32px 0 48px;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 0;
+            border: 2px solid #1a1a1a;
+        }
+
+        input[type="text"] {
+            flex: 1;
+            border: none;
+            outline: none;
+            font-size: 16px;
+            font-family: 'Libre Baskerville', serif;
+            padding: 14px 16px;
+            background: white;
+        }
+
+        input[type="text"]::placeholder {
+            color: #aaa;
+        }
+
+        button[type="submit"] {
+            background: #1a1a1a;
+            color: white;
+            border: none;
+            padding: 14px 28px;
+            font-size: 13px;
+            font-family: 'Libre Baskerville', serif;
+            font-weight: 700;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            transition: background 0.15s;
+        }
+
+        button[type="submit"]:hover {
+            background: #333;
+        }
+
+        button[type="submit"]:disabled {
+            background: #888;
+            cursor: not-allowed;
+        }
+
+        /* Preview hint */
+        .preview-hint {
+            margin-top: 32px;
+            padding: 24px;
+            background: white;
+            border: 1px solid #e0e0e0;
+        }
+
+        .preview-label {
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: #999;
+            margin-bottom: 12px;
+        }
+
+        .preview-content {
+            font-size: 13px;
+            line-height: 1.7;
+            color: #555;
+        }
+
+        .preview-content .takeaway {
+            margin-bottom: 6px;
+        }
+
+        .preview-content .takeaway::before {
+            content: "•";
+            margin-right: 8px;
+            color: #1a1a1a;
+        }
+
+        .preview-content .transcript {
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px solid #eee;
+            font-style: italic;
+            color: #777;
+        }
+
+        .preview-content .note {
+            margin-top: 16px;
+            font-size: 11px;
+            color: #aaa;
+        }
+
+        /* Progress */
+        .progress-container {
+            padding: 48px 0;
+            text-align: center;
+        }
+
+        .progress-bar {
+            height: 2px;
+            background: #e0e0e0;
+            width: 100%;
+            margin-bottom: 16px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: #1a1a1a;
+            width: 0%;
+            transition: width 0.5s ease;
+        }
+
+        .progress-text {
+            font-size: 13px;
+            color: #888;
+        }
+
+        /* Error */
+        .error-container {
+            padding: 24px 0;
+        }
+
+        .error-container p {
+            font-size: 14px;
+            color: #c00;
+            padding: 16px;
+            background: #fff5f5;
+            border-left: 3px solid #c00;
+        }
+
+        /* Result */
+        .result-container {
+            padding-bottom: 60px;
+        }
+
+        .result-toolbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 0;
+            border-bottom: 1px solid #e0e0e0;
+            margin-bottom: 32px;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .toolbar-left {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .toolbar-right {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        /* Font dropdown */
+        .font-dropdown {
+            position: relative;
+        }
+
+        .font-combo {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+            font-size: 12px;
+            padding: 6px 12px;
+            border: 1px solid #ddd;
+            background: white;
+            user-select: none;
+        }
+
+        .font-combo:hover {
+            border-color: #1a1a1a;
+        }
+
+        .font-arrow::after {
+            content: '\25BE';
+            font-size: 10px;
+        }
+
+        .font-menu {
+            display: none;
+            position: absolute;
+            left: 0;
+            top: 100%;
+            margin-top: 2px;
+            background: white;
+            border: 1px solid #1a1a1a;
+            z-index: 10;
+            min-width: 180px;
+        }
+
+        .font-menu.show {
+            display: block;
+        }
+
+        .font-option {
+            display: block;
+            width: 100%;
+            padding: 10px 14px;
+            border: none;
+            background: none;
+            font-size: 13px;
+            text-align: left;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+
+        .font-option:hover {
+            background: #1a1a1a;
+            color: white;
+        }
+
+        .font-option.selected {
+            font-weight: bold;
+        }
+
+        /* Zoom controls */
+        .zoom-controls {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 12px;
+        }
+
+        .zoom-btn {
+            background: white;
+            border: 1px solid #ddd;
+            width: 28px;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 16px;
+            font-family: 'Libre Baskerville', serif;
+        }
+
+        .zoom-btn:hover {
+            border-color: #1a1a1a;
+        }
+
+        #zoom-level {
+            min-width: 40px;
+            text-align: center;
+            font-size: 12px;
+            color: #888;
+        }
+
+        /* Save dropdown */
+        .save-dropdown {
+            position: relative;
+        }
+
+        .download-btn {
+            background: white;
+            border: 1px solid #1a1a1a;
+            padding: 6px 16px;
+            font-size: 12px;
+            font-family: 'Libre Baskerville', serif;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.15s;
+        }
+
+        .download-btn:hover {
+            background: #1a1a1a;
+            color: white;
+        }
+
+        .save-menu {
+            display: none;
+            position: absolute;
+            right: 0;
+            top: 100%;
+            margin-top: 4px;
+            background: white;
+            border: 1px solid #1a1a1a;
+            z-index: 10;
+        }
+
+        .save-menu.show {
+            display: block;
+        }
+
+        .save-option {
+            display: block;
+            width: 100%;
+            padding: 10px 18px;
+            border: none;
+            background: none;
+            font-size: 13px;
+            font-family: 'Libre Baskerville', serif;
+            text-align: left;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+
+        .save-option:hover {
+            background: #1a1a1a;
+            color: white;
+        }
+
+        /* Markdown viewer */
+        #markdown-viewer {
+            font-size: 16px;
+            line-height: 1.8;
+        }
+
+        #markdown-viewer img {
+            max-width: 100%;
+            margin: 20px 0;
+        }
+
+        #markdown-viewer h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 32px;
+            font-weight: 900;
+            line-height: 1.2;
+            margin: 24px 0 16px;
+        }
+
+        #markdown-viewer h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 14px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin: 40px 0 16px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        #markdown-viewer h3 {
+            font-family: 'Playfair Display', serif;
+            font-size: 18px;
+            font-weight: 700;
+            margin: 32px 0 12px;
+        }
+
+        #markdown-viewer p {
+            margin-bottom: 16px;
+            color: #333;
+        }
+
+        #markdown-viewer ul, #markdown-viewer ol {
+            margin: 0 0 16px 24px;
+        }
+
+        #markdown-viewer li {
+            margin-bottom: 8px;
+            color: #333;
+        }
+
+        #markdown-viewer hr {
+            border: none;
+            border-top: 1px solid #e0e0e0;
+            margin: 32px 0;
+        }
+
+        #markdown-viewer strong {
+            font-weight: 700;
+        }
+
+        #markdown-viewer blockquote {
+            border-left: 3px solid #1a1a1a;
+            padding-left: 20px;
+            margin: 20px 0;
+            font-style: italic;
+            color: #555;
+        }
+
+        /* Footer */
+        footer {
+            padding: 48px 0;
+            text-align: center;
+        }
+
+        footer p {
+            font-size: 13px;
+            color: #999;
+        }
+
+        footer a {
+            color: #2563eb;
+            text-decoration: none;
+        }
+
+        footer a:hover {
+            color: #1d4ed8;
+            text-decoration: underline;
+        }
+
+        /* Utility */
+        .hidden {
+            display: none !important;
+        }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            .masthead {
+                font-size: 42px;
+            }
+
+            .input-group {
+                flex-direction: column;
+                border: none;
+            }
+
+            input[type="text"] {
+                border: 2px solid #1a1a1a;
+                border-bottom: none;
+            }
+
+            button[type="submit"] {
+                border: 2px solid #1a1a1a;
+            }
+
+            .result-toolbar {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .preview-hint {
+                padding: 16px;
+            }
+        }
+    </style>
 </head>
 <body>
     <div class="container">
         <header>
-            <h1>ihatevideo.txt</h1>
-            <div class="window-buttons">
-                <button class="win-btn minimize" title="Minimize"><span class="min-icon"></span></button>
-                <button class="win-btn maximize" title="Maximize"><span class="max-icon"></span></button>
-                <button class="win-btn close" title="Close"><span class="close-icon"></span></button>
-            </div>
-            <p>Tired of talks and podcasts being video-only? Mourning the transition to a post-literate society? Use this tool to take any YouTube link and convert it to a readable grammatical transcript, with chapters and top takeaways.</p>
+            <h1 class="masthead">UNWATCH</h1>
+            <p class="tagline">Your videos, in words.</p>
+            <p class="attribution">made by <a href="https://www.linkedin.com/in/prakharsingh96/" target="_blank">Prakhar</a></p>
         </header>
 
-        <form id="transcribe-form">
-            <div class="input-group">
-                <input
-                    type="url"
-                    id="url-input"
-                    placeholder="Paste YouTube URL here..."
-                    required
-                >
-                <button type="submit" id="submit-btn">Textify</button>
-            </div>
-        </form>
+        <div class="input-section">
+            <form id="transcribe-form">
+                <div class="input-group">
+                    <input
+                        type="text"
+                        id="url-input"
+                        placeholder="Paste a YouTube or podcast link..."
+                        required
+                    >
+                    <button type="submit" id="submit-btn">Transcribe</button>
+                </div>
+            </form>
 
-        <div id="progress-container" class="hidden">
+            <div class="preview-hint" id="preview-hint">
+                <p class="preview-label">What you'll get</p>
+                <div class="preview-content">
+                    <div class="takeaway">Key takeaways extracted automatically</div>
+                    <div class="takeaway">Full transcript with chapters</div>
+                    <div class="takeaway">Download as PDF or Markdown</div>
+                    <p class="transcript">"The cleaned transcript appears here, properly formatted with paragraphs and speaker labels..."</p>
+                    <p class="note">Best for videos up to ~1 hour</p>
+                </div>
+            </div>
+        </div>
+
+        <div id="progress-container" class="progress-container hidden">
             <div class="progress-bar">
                 <div class="progress-fill"></div>
             </div>
-            <p id="progress-text">Starting...</p>
+            <p class="progress-text" id="progress-text">Starting...</p>
         </div>
 
-        <div id="result-container" class="hidden">
-            <div class="result-header">
-                <h2 id="result-title"></h2>
-                <div class="save-dropdown">
-                    <button id="save-btn" class="download-btn">💾 Save ▾</button>
-                    <div class="save-menu" id="save-menu">
-                        <button id="download-md-btn" class="save-option">Markdown (.md)</button>
-                        <button id="download-pdf-btn" class="save-option">PDF (.pdf)</button>
-                    </div>
-                </div>
-            </div>
-            <div class="viewer-toolbar">
-                <div class="font-dropdown">
-                    <div class="font-combo" id="font-combo">
-                        <span class="font-value" id="font-value">Times New Roman</span>
-                        <span class="font-arrow"></span>
-                    </div>
-                    <div class="font-menu" id="font-menu">
-                        <button class="font-option" data-font="Arial" style="font-family: Arial, sans-serif;">Arial</button>
-                        <button class="font-option" data-font="Comic Sans MS" style="font-family: 'Comic Sans MS', cursive;">Comic Sans</button>
-                        <button class="font-option" data-font="Courier New" style="font-family: 'Courier New', monospace;">Courier New</button>
-                        <button class="font-option" data-font="Georgia" style="font-family: Georgia, serif;">Georgia</button>
-                        <button class="font-option" data-font="Tahoma" style="font-family: Tahoma, sans-serif;">Tahoma</button>
-                        <button class="font-option selected" data-font="Times New Roman" style="font-family: 'Times New Roman', serif;">Times New Roman</button>
-                        <button class="font-option" data-font="Wingdings" style="font-family: Wingdings;">Wingdings</button>
-                    </div>
-                </div>
-                <div class="zoom-controls">
-                    <button id="zoom-out" class="zoom-btn">−</button>
-                    <span id="zoom-level">100%</span>
-                    <button id="zoom-in" class="zoom-btn">+</button>
-                </div>
-            </div>
-            <div class="ruler">
-                <div class="ruler-marks">
-                    <span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span>
-                </div>
-            </div>
-            <div class="document-area">
-                <div class="vertical-ruler">
-                    <span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span><span>8</span><span>9</span><span>10</span>
-                </div>
-                <div id="markdown-viewer"></div>
-            </div>
-        </div>
-
-        <div id="error-container" class="hidden">
+        <div id="error-container" class="error-container hidden">
             <p id="error-text"></p>
         </div>
 
-        <footer>
-            <p>made with love + hate by <a href="https://jasmi.news" target="_blank">jasmine sun</a> + claude code</p>
-        </footer>
-    </div>
+        <div id="result-container" class="result-container hidden">
+            <div class="result-toolbar">
+                <div class="toolbar-left">
+                    <div class="font-dropdown">
+                        <div class="font-combo" id="font-combo">
+                            <span class="font-value" id="font-value">Libre Baskerville</span>
+                            <span class="font-arrow"></span>
+                        </div>
+                        <div class="font-menu" id="font-menu">
+                            <button class="font-option selected" data-font="'Libre Baskerville', serif" style="font-family: 'Libre Baskerville', serif;">Libre Baskerville</button>
+                            <button class="font-option" data-font="'Lora', serif" style="font-family: 'Lora', serif;">Lora</button>
+                            <button class="font-option" data-font="'Merriweather', serif" style="font-family: 'Merriweather', serif;">Merriweather</button>
+                            <button class="font-option" data-font="Georgia, serif" style="font-family: Georgia, serif;">Georgia</button>
+                            <button class="font-option" data-font="Arial, sans-serif" style="font-family: Arial, sans-serif;">Arial</button>
+                        </div>
+                    </div>
+                    <div class="zoom-controls">
+                        <button id="zoom-out" class="zoom-btn">&minus;</button>
+                        <span id="zoom-level">100%</span>
+                        <button id="zoom-in" class="zoom-btn">+</button>
+                    </div>
+                </div>
+                <div class="toolbar-right">
+                    <div class="save-dropdown">
+                        <button id="save-btn" class="download-btn">Save &#9662;</button>
+                        <div class="save-menu" id="save-menu">
+                            <button id="download-md-btn" class="save-option">Markdown (.md)</button>
+                            <button id="download-pdf-btn" class="save-option">PDF (.pdf)</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="markdown-viewer"></div>
+        </div>
+
+            </div>
 
     <script>
         const form = document.getElementById('transcribe-form');
@@ -102,14 +592,13 @@
         const progressText = document.getElementById('progress-text');
         const progressFill = document.querySelector('.progress-fill');
         const resultContainer = document.getElementById('result-container');
-        const resultTitle = document.getElementById('result-title');
         const markdownViewer = document.getElementById('markdown-viewer');
         const errorContainer = document.getElementById('error-container');
         const errorText = document.getElementById('error-text');
+        const previewHint = document.getElementById('preview-hint');
 
         let currentJobId = null;
 
-        // Check for URL parameter and auto-submit
         const params = new URLSearchParams(window.location.search);
         const autoUrl = params.get('url');
         if (autoUrl) {
@@ -119,20 +608,18 @@
 
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
-
             const url = urlInput.value.trim();
             if (!url) return;
 
-            // Reset UI
             progressContainer.classList.remove('hidden');
             resultContainer.classList.add('hidden');
             errorContainer.classList.add('hidden');
+            previewHint.classList.add('hidden');
             submitBtn.disabled = true;
-            submitBtn.textContent = 'Textifying...';
+            submitBtn.textContent = 'Working...';
             progressFill.style.width = '10%';
 
             try {
-                // Start transcription
                 const response = await fetch('/transcribe', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -140,10 +627,7 @@
                 });
 
                 const data = await response.json();
-
-                if (data.error) {
-                    throw new Error(data.error);
-                }
+                if (data.error) throw new Error(data.error);
 
                 currentJobId = data.job_id;
                 pollStatus();
@@ -161,24 +645,21 @@
                     throw new Error(data.error);
                 }
 
-                // Update progress bar based on step
                 const steps = {
                     'Starting...': 10,
                     'Getting video info...': 20,
                     'Extracting transcript...': 40,
                     'Cleaning transcript with Gemini...': 60,
-                    'Generating takeaways...': 80,
+                    'Generating takeaways...': 85,
                     'Loaded from cache': 100
                 };
-                const currentProgress = steps[data.progress] || 50;
-                progressFill.style.width = currentProgress + '%';
-
-                // Show progress with simple time hint
-                if (currentProgress < 100 && data.progress !== 'Loaded from cache') {
-                    progressText.textContent = `${data.progress} (this may take a few minutes...)`;
-                } else {
-                    progressText.textContent = data.progress;
+                let currentProgress = steps[data.progress];
+                if (!currentProgress) {
+                    if (data.progress.includes('chunk')) currentProgress = 65;
+                    else currentProgress = 50;
                 }
+                progressFill.style.width = currentProgress + '%';
+                progressText.textContent = data.progress;
 
                 if (data.status === 'completed') {
                     progressFill.style.width = '100%';
@@ -186,7 +667,6 @@
                 } else if (data.status === 'error') {
                     throw new Error(data.error);
                 } else {
-                    // Keep polling
                     setTimeout(pollStatus, 1000);
                 }
             } catch (error) {
@@ -197,29 +677,26 @@
         function showResult(result) {
             progressContainer.classList.add('hidden');
             resultContainer.classList.remove('hidden');
-
-            resultTitle.textContent = result.title;
             markdownViewer.innerHTML = marked.parse(result.markdown);
-            document.title = result.title;
-
+            document.title = result.title + ' \u2014 UNWATCH';
             submitBtn.disabled = false;
-            submitBtn.textContent = 'Textify';
+            submitBtn.textContent = 'Transcribe';
         }
 
         function showError(message) {
             progressContainer.classList.add('hidden');
             errorContainer.classList.remove('hidden');
-            errorText.textContent = `Error: ${message}`;
-
+            previewHint.classList.remove('hidden');
+            errorText.textContent = message;
             submitBtn.disabled = false;
-            submitBtn.textContent = 'Textify';
+            submitBtn.textContent = 'Transcribe';
         }
 
         // Font dropdown
         const fontCombo = document.getElementById('font-combo');
         const fontValue = document.getElementById('font-value');
         const fontMenu = document.getElementById('font-menu');
-        let currentFont = 'Times New Roman';
+        let currentFont = "'Libre Baskerville', serif";
 
         fontCombo.addEventListener('click', (e) => {
             e.stopPropagation();
@@ -232,18 +709,12 @@
                 const font = option.dataset.font;
                 currentFont = font;
 
-                // Update displayed text
                 fontValue.textContent = option.textContent;
 
-                // Update selected state
                 fontMenu.querySelectorAll('.font-option').forEach(o => o.classList.remove('selected'));
                 option.classList.add('selected');
 
-                // Apply font to viewer
-                markdownViewer.style.fontFamily = font + ', serif';
-                markdownViewer.querySelectorAll('h1, h2, h3, h4, h5, h6').forEach(h => {
-                    h.style.fontFamily = font + ', serif';
-                });
+                markdownViewer.style.fontFamily = font;
 
                 fontMenu.classList.remove('show');
             });
@@ -256,7 +727,7 @@
         let currentZoom = 100;
 
         function updateZoom() {
-            markdownViewer.style.fontSize = (12 * currentZoom / 100) + 'pt';
+            markdownViewer.style.fontSize = (16 * currentZoom / 100) + 'px';
             zoomLevel.textContent = currentZoom + '%';
         }
 
@@ -293,12 +764,9 @@
 
         async function downloadFile(url, defaultFilename) {
             const response = await fetch(url);
-            if (!response.ok) {
-                throw new Error('Download failed');
-            }
+            if (!response.ok) throw new Error('Download failed');
             const blob = await response.blob();
             const filename = response.headers.get('Content-Disposition')?.match(/filename="?([^";\n]+)"?/)?.[1] || defaultFilename;
-
             const a = document.createElement('a');
             a.href = window.URL.createObjectURL(blob);
             a.download = filename;
@@ -324,50 +792,14 @@
                 try {
                     saveBtn.disabled = true;
                     saveBtn.textContent = 'Generating...';
-                    const font = encodeURIComponent(currentFont);
-                    await downloadFile(`/download/${currentJobId}/pdf?font=${font}&zoom=${currentZoom}`, 'transcript.pdf');
+                    await downloadFile(`/download/${currentJobId}/pdf?font=Georgia&zoom=${currentZoom}`, 'transcript.pdf');
                 } catch (error) {
                     alert('PDF download failed: ' + error.message);
                 } finally {
                     saveBtn.disabled = false;
-                    saveBtn.textContent = '💾 Save ▾';
+                    saveBtn.textContent = 'Save \u25BE';
                 }
                 saveMenu.classList.remove('show');
-            }
-        });
-    </script>
-
-    <div class="taskbar">
-        <button class="start-button">start</button>
-        <div class="taskbar-windows">
-            <div class="taskbar-window">📄 ihatevideo.txt</div>
-        </div>
-        <div class="taskbar-time" id="taskbar-time">12:00 PM</div>
-    </div>
-
-    <script>
-        // Update taskbar time
-        function updateTime() {
-            const now = new Date();
-            const time = now.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
-            document.getElementById('taskbar-time').textContent = time;
-        }
-        updateTime();
-        setInterval(updateTime, 1000);
-
-        // Wallpaper toggle
-        const wallpapers = [
-            "url('{{ url_for('static', filename='bliss.jpg') }}') no-repeat center center fixed",
-            "url('{{ url_for('static', filename='teal.webp') }}') no-repeat center center fixed",
-            "#000"
-        ];
-        let currentWallpaper = 0;
-
-        document.querySelector('.start-button').addEventListener('click', () => {
-            currentWallpaper = (currentWallpaper + 1) % wallpapers.length;
-            document.body.style.background = wallpapers[currentWallpaper];
-            if (currentWallpaper < 2) {
-                document.body.style.backgroundSize = 'cover';
             }
         });
     </script>

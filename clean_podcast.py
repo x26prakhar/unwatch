@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-Podcast Transcript Cleaner
-Extracts YouTube transcripts and cleans them using Gemini Pro.
+UNWATCH - Transcript Extractor
+Extracts YouTube transcripts and cleans them using Gemini.
 """
 
 import argparse
@@ -16,6 +16,8 @@ from pathlib import Path
 
 from google import genai
 from youtube_transcript_api import YouTubeTranscriptApi
+
+YT_DLP = "yt-dlp"
 
 
 def extract_video_id(url: str) -> str:
@@ -52,7 +54,7 @@ def extract_transcript(url: str) -> str:
         # Download subtitles using yt-dlp
         result = subprocess.run(
             [
-                "yt-dlp",
+                YT_DLP,
                 "--write-auto-sub",
                 "--sub-lang", "en",
                 "--skip-download",
@@ -137,7 +139,7 @@ TRANSCRIPT:
 
 
 def clean_transcript_with_gemini(transcript: str, video_title: str, api_key: str) -> str:
-    """Use Gemini Pro to clean up the transcript."""
+    """Use Gemini to clean up the transcript."""
     client = genai.Client(api_key=api_key)
 
     prompt = f"""Clean up this podcast transcript for "{video_title}".
@@ -206,7 +208,6 @@ def process_video(url: str, api_key: str, progress_callback=None) -> dict:
     # Build markdown content with thumbnail
     thumbnail_url = f"https://img.youtube.com/vi/{info['id']}/maxresdefault.jpg"
     markdown = f"![Thumbnail]({thumbnail_url})\n\n"
-    markdown += f"# {info['title']}\n\n"
     markdown += f"Source: {url}\n\n"
     markdown += "## Top Takeaways\n\n"
     markdown += takeaways
@@ -228,7 +229,7 @@ def process_video(url: str, api_key: str, progress_callback=None) -> dict:
 
 def main():
     parser = argparse.ArgumentParser(
-        description="Extract and clean podcast transcripts from YouTube"
+        description="UNWATCH - Extract and clean transcripts from YouTube"
     )
     parser.add_argument("url", help="YouTube video URL")
     parser.add_argument(
@@ -285,7 +286,7 @@ def main():
             output_path = Path(args.output)
         else:
             filename = f"{sanitize_filename(info['title'])}{suffix}.md"
-            output_path = Path.home() / "podcast-cleaner" / "transcripts" / filename
+            output_path = Path.home() / "unwatch" / "transcripts" / filename
 
         # Ensure output directory exists
         output_path.parent.mkdir(parents=True, exist_ok=True)
