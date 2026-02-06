@@ -48,13 +48,16 @@ def get_video_info(url: str) -> dict:
         raise Exception(f"Failed to get video info: {e}")
 
 
-def extract_transcript(url: str) -> str:
+def extract_transcript(url: str, proxy_url: str = None) -> str:
     """Extract transcript from YouTube video using youtube-transcript-api."""
     video_id = extract_video_id(url)
 
     try:
-        # Try to get transcript using youtube-transcript-api (doesn't get blocked)
-        ytt_api = YouTubeTranscriptApi()
+        # Configure proxy if provided (needed for cloud deployments)
+        if proxy_url:
+            ytt_api = YouTubeTranscriptApi(proxies={"https": proxy_url, "http": proxy_url})
+        else:
+            ytt_api = YouTubeTranscriptApi()
         transcript = ytt_api.fetch(video_id, languages=['en', 'en-US', 'en-GB'])
 
         # Combine all text segments
@@ -163,7 +166,7 @@ def sanitize_filename(title: str) -> str:
     return safe[:100]  # Limit length
 
 
-def process_video(url: str, api_key: str, progress_callback=None) -> dict:
+def process_video(url: str, api_key: str, progress_callback=None, proxy_url: str = None) -> dict:
     """
     Process a YouTube video and return the cleaned transcript with takeaways.
 
@@ -171,6 +174,7 @@ def process_video(url: str, api_key: str, progress_callback=None) -> dict:
         url: YouTube video URL
         api_key: Google AI API key
         progress_callback: Optional callback function for progress updates
+        proxy_url: Optional proxy URL for cloud deployments
 
     Returns:
         dict with keys: title, url, takeaways, transcript, markdown, filename
@@ -183,7 +187,7 @@ def process_video(url: str, api_key: str, progress_callback=None) -> dict:
     info = get_video_info(url)
 
     update_progress("Extracting transcript...")
-    raw_transcript = extract_transcript(url)
+    raw_transcript = extract_transcript(url, proxy_url)
 
     update_progress("Cleaning transcript with Gemini...")
     transcript = clean_transcript_with_gemini(raw_transcript, info["title"], api_key)

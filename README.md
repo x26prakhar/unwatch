@@ -50,10 +50,18 @@ Convert YouTube videos and podcasts into clean, readable transcripts with AI-gen
 3. Wait for processing
 4. Read, customize font/zoom, and download
 
+## Cloud Deployment
+
+YouTube blocks requests from cloud provider IPs. For cloud deployments (Render, AWS, etc.), you need a proxy service:
+
+1. Sign up for a proxy service like [Webshare](https://www.webshare.io/) (has free tier)
+2. Get your proxy URL in format: `http://username:password@proxy-host:port`
+3. Add `PROXY_URL` environment variable in your deployment settings
+
 ## Tech Stack
 
 - Flask
-- yt-dlp
+- youtube-transcript-api
 - Google Gemini AI
 - fpdf2
 - marked.js

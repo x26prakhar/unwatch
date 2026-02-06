@@ -96,13 +96,16 @@ def transcribe():
         "error": None,
     }
 
+    # Get proxy URL for cloud deployments (YouTube blocks cloud IPs)
+    proxy_url = os.environ.get("PROXY_URL")
+
     # Run in background thread
     def run_job():
         try:
             def progress_callback(message):
                 jobs[job_id]["progress"] = message
 
-            result = process_video(url, api_key, progress_callback)
+            result = process_video(url, api_key, progress_callback, proxy_url)
             jobs[job_id]["status"] = "completed"
             jobs[job_id]["result"] = result
             # Cache the result and save to disk
