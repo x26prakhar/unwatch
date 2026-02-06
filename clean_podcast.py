@@ -16,6 +16,7 @@ from pathlib import Path
 
 from google import genai
 from youtube_transcript_api import YouTubeTranscriptApi
+import httpx
 
 YT_DLP = "yt-dlp"
 
@@ -55,7 +56,8 @@ def extract_transcript(url: str, proxy_url: str = None) -> str:
     try:
         # Configure proxy if provided (needed for cloud deployments)
         if proxy_url:
-            ytt_api = YouTubeTranscriptApi(proxies={"https": proxy_url, "http": proxy_url})
+            http_client = httpx.Client(proxy=proxy_url)
+            ytt_api = YouTubeTranscriptApi(http_client=http_client)
         else:
             ytt_api = YouTubeTranscriptApi()
         transcript = ytt_api.fetch(video_id, languages=['en', 'en-US', 'en-GB'])
